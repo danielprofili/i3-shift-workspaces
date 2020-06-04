@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+from i3ipc import Connection, Event
+
+i3 = Connection()
+
+# Callback that is called when the workspace is switched
+def on_ws_switch(self, e):
+    workspaces = i3.get_workspaces()
+    new_order = [0] * (len(workspaces) + 1)
+    i = 1
+    for ws in workspaces:
+        if ws.num != i and ws.num > 0:
+            # workspace ws is out of order
+            new_name = "%d:%s" % (i, ws.name[ws.name.find(':')+1:])
+            # print(new_name)
+            i3.command("rename workspace %s to %s" % (ws.name, new_name))
+
+        i += 1
+    
+# Register callback with workspace move event
+i3.on(Event.WORKSPACE_FOCUS, on_ws_switch)
+i3.main()
